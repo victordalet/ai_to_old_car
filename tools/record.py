@@ -14,7 +14,6 @@ def main():
         ret, frame = cap.read()
 
         if ret:
-
             out.write(frame)
 
             cv2.imshow("frame", frame)

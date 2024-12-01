@@ -1,42 +1,25 @@
 # ai_to_old_car
 
-
 ---
 
-
-## 1. Compilation
-
----
-
-```
-mkdir build-dir
-cd build-dir
-cmake ..
-make
-```
-
-
-## 2. Run
+## 1. Run
 
 ---
 
 ```
-./ai_to_old_car <path_to_onnx_model>
+py main.py 
 ```
 
-
-## 3. Environment
-
+## 2. Environment
 
 ---
 
 - `DEBUG`: Display screen output
 
-
-## 4. Linter
+## 3. Linter
 
 ---
 
 ```
-cpplint 
+black .
 ```
