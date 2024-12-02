@@ -3,7 +3,7 @@ import cv2
 
 
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture("test.mp4")
 
     while cap.isOpened():
         ret, frame = cap.read()
