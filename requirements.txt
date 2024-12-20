@@ -1,3 +1,4 @@
 opencv-python
 ultralytics
 onnxruntime-gpu
+moviepy==2.1.1
