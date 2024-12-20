@@ -26,10 +26,17 @@ class RoadDetector:
     def display_lines(frame: np.ndarray, lines: np.ndarray) -> np.ndarray:
         line_image = np.zeros_like(frame)
         if lines is not None:
-            determine_ligne_deviation = RoadDetector.determine_ligne_deviation(lines)
+            determine_ligne_deviation = RoadDetector.determine_ligne_deviation(lines, frame)
             for line in lines:
                 x1, y1, x2, y2 = line.reshape(4)
                 cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
+            cv2.line(
+                line_image,
+                (int(frame.shape[1] / 2), frame.shape[0]),
+                (int(frame.shape[1] / 2), 0),
+                (0, 0, 255),
+                10,
+            )
         return line_image
 
     @staticmethod
@@ -48,24 +55,18 @@ class RoadDetector:
         return lines
 
     @staticmethod
-    def determine_ligne_deviation(lines: np.ndarray) -> str:
-        left_lines = []
-        right_lines = []
-        middle_lines = []
+    def determine_ligne_deviation(lines: np.ndarray, frame: np.ndarray) -> str:
+        left = 0
+        right = 0
         for line in lines:
-            x1, y1, x2, y2 = line.reshape(4)
-            slope = (y2 - y1) / (x2 - x1)
-            if slope < -0.5:
-                right_lines.append(line)
-            elif slope > 0.5:
-                left_lines.append(line)
+            if line[0][0] < frame.shape[1] / 2:
+                if line[0][2] > frame.shape[1] / 2:
+                    left += 1
             else:
-                middle_lines.append(line)
-        if len(left_lines) > len(right_lines) and len(left_lines) > len(middle_lines):
+                if line[0][2] < frame.shape[1] / 2:
+                    right += 1
+        print("left: ", left)
+        print("right: ", right)
+        if left > right:
             return "left"
-        elif len(right_lines) > len(left_lines) and len(right_lines) > len(
-            middle_lines
-        ):
-            return "right"
-        else:
-            return "middle"
+        return "right"
