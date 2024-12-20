@@ -26,6 +26,7 @@ class RoadDetector:
     def display_lines(frame: np.ndarray, lines: np.ndarray) -> np.ndarray:
         line_image = np.zeros_like(frame)
         if lines is not None:
+            determine_ligne_deviation = RoadDetector.determine_ligne_deviation(lines)
             for line in lines:
                 x1, y1, x2, y2 = line.reshape(4)
                 cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
@@ -45,3 +46,26 @@ class RoadDetector:
             maxLineGap=5,
         )
         return lines
+
+    @staticmethod
+    def determine_ligne_deviation(lines: np.ndarray) -> str:
+        left_lines = []
+        right_lines = []
+        middle_lines = []
+        for line in lines:
+            x1, y1, x2, y2 = line.reshape(4)
+            slope = (y2 - y1) / (x2 - x1)
+            if slope < -0.5:
+                right_lines.append(line)
+            elif slope > 0.5:
+                left_lines.append(line)
+            else:
+                middle_lines.append(line)
+        if len(left_lines) > len(right_lines) and len(left_lines) > len(middle_lines):
+            return "left"
+        elif len(right_lines) > len(left_lines) and len(right_lines) > len(
+            middle_lines
+        ):
+            return "right"
+        else:
+            return "middle"
