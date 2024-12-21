@@ -1,2 +1,4 @@
 build-dir
 .idea
+*.pt
+*.onnx
