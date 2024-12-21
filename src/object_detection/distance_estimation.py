@@ -2,7 +2,6 @@ from typing import List
 
 
 class DistanceEstimation:
-
     @staticmethod
     def area_to_object(object_detected: dict) -> float:
         x1 = int(object_detected["box"]["x1"])
