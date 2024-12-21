@@ -14,6 +14,7 @@
 - Insert your microSD card. If you have no other external drives attached, Etcher will automatically select the microSD card as target device. Otherwise, click “Change” and choose the correct device.
 - Click “Flash!” Your OS may prompt for your username and password before it allows Etcher to proceed.
 
+
 ## 2. Run
 
 ---

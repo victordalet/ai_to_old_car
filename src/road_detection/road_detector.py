@@ -26,9 +26,6 @@ class RoadDetector:
     def display_lines(frame: np.ndarray, lines: np.ndarray) -> np.ndarray:
         line_image = np.zeros_like(frame)
         if lines is not None:
-            determine_ligne_deviation = RoadDetector.determine_ligne_deviation(
-                lines, frame
-            )
             for line in lines:
                 x1, y1, x2, y2 = line.reshape(4)
                 cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
@@ -61,6 +58,8 @@ class RoadDetector:
         left_lines = []
         right_lines = []
         middle_lines = []
+        if lines is None:
+            return "middle"
         for line in lines:
             x1, y1, x2, y2 = line.reshape(4)
             slope = (y2 - y1) / (x2 - x1)
