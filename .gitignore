@@ -2,3 +2,5 @@ build-dir
 .idea
 *.pt
 *.onnx
+output.mp4
+**/__pycache__/

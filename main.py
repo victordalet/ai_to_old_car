@@ -1,6 +1,7 @@
 from src.road_detection.road_detector import RoadDetector
 from src.object_detection.tracking import Tracking
 from src.object_detection.distance_estimation import DistanceEstimation
+from src.pico_script.pico_controller import PicoController
 import cv2
 from collections import defaultdict
 import numpy as np
@@ -16,6 +17,7 @@ class Main:
         self.tracking = Tracking("yolov10s.pt")
         self.road_decision: List[str] = []
         self.detection_decision: List[str] = []
+        self.last_action = "left"
 
     def get_decision(self) -> str:
         if len(self.detection_decision) > 5:
@@ -27,6 +29,18 @@ class Main:
         if self.road_decision[-5:] == ["left"] * 5:
             return "left"
         return "straight"
+
+    def execute_action(self, action: str):
+        if self.last_action != action:
+            if self.last_action == "left":
+                PicoController.execute_change_direction_right()
+            else:
+                PicoController.execute_change_direction_left()
+            self.last_action = action
+        if action == "left":
+            PicoController.execute_left_turn()
+        elif action == "right":
+            PicoController.execute_right_turn()
 
     def pipeline(self):
         while self.cap.isOpened():
@@ -55,17 +69,9 @@ class Main:
                         )
                     else:
                         self.detection_decision.pop(0)
-                    cv2.putText(
-                        frame,
-                        f"Area: {area_to_object}",
-                        (x1, y1 - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.9,
-                        (36, 255, 12),
-                        2,
-                    )
 
                 action = self.get_decision()
+                self.execute_action(action)
                 print(action)
 
             else:
@@ -76,4 +82,6 @@ class Main:
 
 
 if __name__ == "__main__":
+    PicoController.install_micropython()
+    PicoController.execute_test_connection()
     Main().pipeline()
