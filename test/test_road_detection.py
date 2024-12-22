@@ -7,8 +7,10 @@ from collections import defaultdict
 import numpy as np
 from typing import List
 
-MAX_AREA = 40000
+MAX_AREA = 8000
 MAX_ARRAY_DECISION_SIZE = 20
+LEFT_CENTER = 0.3
+RIGHT_CENTER = 0.8
 
 
 class Main:
@@ -43,10 +45,8 @@ class Main:
             if ret:
                 lines = RoadDetector.get_lines(frame)
                 line_image = RoadDetector.display_lines(frame, lines)
-                deviation_position = RoadDetector.determine_ligne_deviation(
-                    lines, frame
-                )
-                road_decision.append(deviation_position)
+                deviation_position = RoadDetector.determine_ligne_deviation(lines)
+                self.road_decision.append(deviation_position)
                 frame = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
                 results_json = self.tracking.get_detection(frame)
 
@@ -57,12 +57,16 @@ class Main:
                     y2 = int(res["box"]["y2"])
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     area_to_object = DistanceEstimation.area_to_object(res)
-                    if area_to_object > MAX_AREA:
-                        self.detection_decision.append(
-                            "left" if x1 > frame.shape[1] / 2 else "right"
-                        )
-                    else:
-                        self.detection_decision.pop(0)
+                    if DistanceEstimation.object_is_in_zone(
+                        res, frame, LEFT_CENTER, RIGHT_CENTER
+                    ):
+                        if area_to_object > MAX_AREA:
+                            self.detection_decision.append(
+                                "left" if x1 > frame.shape[1] / 2 else "right"
+                            )
+                        else:
+                            if len(self.detection_decision) != 0:
+                                self.detection_decision.pop(0)
                     cv2.putText(
                         frame,
                         f"Area: {area_to_object}",
@@ -73,15 +77,38 @@ class Main:
                         2,
                     )
 
-                video_writer.write(frame)
                 action = self.get_decision()
-                print(action)
+                cv2.line(
+                    frame,
+                    (int(frame.shape[1] * LEFT_CENTER), 0),
+                    (int(frame.shape[1] * LEFT_CENTER), frame.shape[0]),
+                    (0, 0, 255),
+                    1,
+                )
+                cv2.line(
+                    frame,
+                    (int(frame.shape[1] * RIGHT_CENTER), 0),
+                    (int(frame.shape[1] * RIGHT_CENTER), frame.shape[0]),
+                    (0, 0, 255),
+                    1,
+                )
+                cv2.putText(
+                    frame,
+                    f"Action: {action}",
+                    (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1,
+                    (36, 255, 12),
+                    2,
+                )
+
+                video_writer.write(frame)
 
             else:
                 break
 
         video_writer.release()
-        cap.release()
+        self.cap.release()
         cv2.destroyAllWindows()
 
 

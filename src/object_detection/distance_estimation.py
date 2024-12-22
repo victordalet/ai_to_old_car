@@ -1,4 +1,5 @@
 from typing import List
+import numpy as np
 
 
 class DistanceEstimation:
@@ -10,3 +11,13 @@ class DistanceEstimation:
         y2 = int(object_detected["box"]["y2"])
         area = (x2 - x1) * (y2 - y1)
         return area
+
+    @staticmethod
+    def object_is_in_zone(
+        object_detected: dict, frame: np.ndarray, left: float, right: float
+    ) -> bool:
+        x1 = int(object_detected["box"]["x1"])
+        x2 = int(object_detected["box"]["x2"])
+        object_center = (x1 + x2) / 2
+        object_center = object_center / frame.shape[1]
+        return left < object_center < right
