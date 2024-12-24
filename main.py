@@ -3,6 +3,7 @@ from src.object_detection.tracking import Tracking
 from src.object_detection.distance_estimation import DistanceEstimation
 from src.pico_script.pico_controller import PicoController
 import cv2
+import os
 from collections import defaultdict
 import numpy as np
 from typing import List
@@ -13,7 +14,7 @@ MAX_ARRAY_DECISION_SIZE = 20
 
 class Main:
     def __init__(self):
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(4)
         self.tracking = Tracking("yolov10s.pt")
         self.road_decision: List[str] = []
         self.detection_decision: List[str] = []
@@ -49,10 +50,8 @@ class Main:
             if ret:
                 lines = RoadDetector.get_lines(frame)
                 line_image = RoadDetector.display_lines(frame, lines)
-                deviation_position = RoadDetector.determine_ligne_deviation(
-                    lines, frame
-                )
-                road_decision.append(deviation_position)
+                deviation_position = RoadDetector.determine_ligne_deviation(lines)
+                self.road_decision.append(deviation_position)
                 frame = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
                 results_json = self.tracking.get_detection(frame)
 
@@ -68,20 +67,22 @@ class Main:
                             "left" if x1 > frame.shape[1] / 2 else "right"
                         )
                     else:
-                        self.detection_decision.pop(0)
+                        if len(self.detection_decision) > 1:
+                            self.detection_decision.pop(0)
 
                 action = self.get_decision()
                 self.execute_action(action)
-                print(action)
+                if os.getenv("DEBUG", False):
+                    cv2.imshow("frame", frame)
 
             else:
                 break
 
-        cap.release()
+        self.cap.release()
         cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    PicoController.install_micropython()
-    PicoController.execute_test_connection()
+    # PicoController.install_micropython()
+    # PicoController.execute_test_connection()
     Main().pipeline()
