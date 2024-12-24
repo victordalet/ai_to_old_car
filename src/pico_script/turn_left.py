@@ -1,7 +1,10 @@
-import machine
-import utime
+from servo import Servo
+import time
 
-servo = machine.PWM(machine.Pin(15))  # signal PWM à la broche GP 15
-servo.freq(50)
+serv = Servo(16)
 
-servo.duty_u16(3500)
+serv.turn_left()
+
+time.sleep(0.2)
+
+serv.destroy()
