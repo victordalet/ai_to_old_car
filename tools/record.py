@@ -3,7 +3,7 @@ import datetime
 
 
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(4)
 
     now = datetime.datetime.now()
     out = cv2.VideoWriter(
@@ -12,6 +12,8 @@ def main():
 
     while cap.isOpened():
         ret, frame = cap.read()
+
+        frame = cv2.flip(frame, -1)
 
         if ret:
             out.write(frame)

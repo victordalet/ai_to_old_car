@@ -1,10 +1,11 @@
 from servo import Servo
+from const import TOP_ARM_MOTOR_PIN
 import time
 
-serv = Servo(16)
+serv = Servo(TOP_ARM_MOTOR_PIN)
 
-serv.turn_left()
+serv.turn(180)
 
-time.sleep(0.2)
+time.sleep(1)
 
 serv.destroy()

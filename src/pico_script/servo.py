@@ -1,22 +1,20 @@
-from machine import PWM, Pin
+from machine import Pin, PWM
 
 
 class Servo:
-    def __init__(self, number):
-        self.servo = PWM(Pin(number))
-        self.servo.freq(50)
+    def __init__(self, number, freq=50):
+        self.pin = Pin(number, Pin.OUT)
+        self.servo = PWM(self.pin)
+        self.servo.freq(freq)
+        self.duty = 0
 
-        self.max_duty = 65025
-        self.dig_0 = 0.0725  # 0°
-        self.dig_90 = 0.12  # 90°
+    def turn(self, angle):
+        self.duty = int(angle / 18 + 2)
+        self.servo.duty_u16(self.duty * 65535 // 100)
 
-    def turn_right(self):
-        self.servo.duty_u16(int(self.max_duty * self.dig_0))
-        self.servo.duty_u16(int(self.max_duty * -self.dig_90))
-
-    def turn_left(self):
-        self.servo.duty_u16(int(self.max_duty * self.dig_0))
-        self.servo.duty_u16(int(self.max_duty * self.dig_90))
+    def get_actual_duty(self):
+        return self.duty
 
     def destroy(self):
         self.servo.deinit()
+        self.pin.deinit()
