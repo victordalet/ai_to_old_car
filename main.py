@@ -46,6 +46,7 @@ class Main:
     def pipeline(self):
         while self.cap.isOpened():
             ret, frame = self.cap.read()
+            frame = cv2.flip(frame, -1)
 
             if ret:
                 lines = RoadDetector.get_lines(frame)
