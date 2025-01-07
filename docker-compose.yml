@@ -1,0 +1,10 @@
+services:
+  auto-car:
+    build: .
+    volumes:
+      - .:/app
+      - /dev/ttyACM0:/dev/ttyACM0
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    restart: unless-stopped
+    privileged: true

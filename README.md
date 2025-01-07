@@ -63,6 +63,18 @@ export PYTHONPATH=$(pwd)/src:$(pwd)
 python3 test/test_road_detection.py
 ```
 
+### With docker
+
+```bash
+docker compose up -d
+```
+
+or 
+
+```bash
+docker compose -f docker-compose-prod.yml up -d
+```
+
 ### Test pico script
 
 ```bash

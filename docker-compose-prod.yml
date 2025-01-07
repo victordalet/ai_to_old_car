@@ -1,0 +1,13 @@
+services:
+  auto-car:
+    image: victordalet/auto-car:latest
+    volumes:
+      - .:/
+      - /dev/ttyACM0:/dev/ttyACM0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
