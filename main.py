@@ -19,22 +19,18 @@ class Main:
     def __init__(self):
         self.cap = cv2.VideoCapture(4)
         self.tracking = Tracking("yolov10s.pt")
-        self.road_decision: List[str] = []
-        self.detection_decision: List[str] = []
+        self.road_decision: List[int] = []
+        self.detection_decision: List[int] = []
         self.last_action = "left"
         self.active_road_detection = True
         self.active_object_detection = True
 
     def get_decision(self) -> str:
         if len(self.detection_decision) > 5:
-            return self.detection_decision[-1]
-        if len(self.road_decision) < 5:
+            return "left" if self.detection_decision[-1] > 0 else "right"
+        if len(self.road_decision) < 1:
             return "straight"
-        if self.road_decision[-5:] == ["right"] * 5:
-            return "right"
-        if self.road_decision[-5:] == ["left"] * 5:
-            return "left"
-        return "straight"
+        return "left" if self.road_decision[-1] > 0 else "right"
 
     def execute_action(self, action: str):
         if self.last_action != action:
@@ -76,7 +72,7 @@ class Main:
                         area_to_object = DistanceEstimation.area_to_object(res)
                         if area_to_object > MAX_AREA:
                             self.detection_decision.append(
-                                "left" if x1 > frame.shape[1] / 2 else "right"
+                                90 if x1 > frame.shape[1] / 2 else -90
                             )
                         else:
                             if len(self.detection_decision) > 1:

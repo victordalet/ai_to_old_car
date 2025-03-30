@@ -15,8 +15,8 @@ class RoadDetector:
 
     @staticmethod
     def region_of_interest(frame: np.ndarray) -> np.ndarray:
-        height = frame.shape[0]
-        polygons = np.array([[(200, height), (1100, height), (550, 250)]])
+        height = frame.shape[0] - 30
+        polygons = np.array([[(200, height), (1100, height), (550, 50)]])
         mask = np.zeros_like(frame)
         cv2.fillPoly(mask, polygons, 255)
         masked_image = cv2.bitwise_and(frame, mask)
@@ -29,13 +29,6 @@ class RoadDetector:
             for line in lines:
                 x1, y1, x2, y2 = line.reshape(4)
                 cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
-            cv2.line(
-                line_image,
-                (int(frame.shape[1] / 2), frame.shape[0]),
-                (int(frame.shape[1] / 2), 0),
-                (0, 0, 255),
-                10,
-            )
         return line_image
 
     @staticmethod
@@ -54,26 +47,9 @@ class RoadDetector:
         return lines
 
     @staticmethod
-    def determine_ligne_deviation(lines: np.ndarray) -> str:
-        left_lines = []
-        right_lines = []
-        middle_lines = []
+    def determine_ligne_deviation(lines: np.ndarray, turn_factor=0.25) -> int:
         if lines is None:
-            return "middle"
+            return 0
         for line in lines:
             x1, y1, x2, y2 = line.reshape(4)
-            slope = (y2 - y1) / (x2 - x1)
-            if slope < -0.5:
-                right_lines.append(line)
-            elif slope > 0.5:
-                left_lines.append(line)
-            else:
-                middle_lines.append(line)
-        if len(left_lines) > len(right_lines) and len(left_lines) > len(middle_lines):
-            return "left"
-        elif len(right_lines) > len(left_lines) and len(right_lines) > len(
-            middle_lines
-        ):
-            return "right"
-        else:
-            return "middle"
+            return -(x1 - x2) * turn_factor
