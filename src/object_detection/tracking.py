@@ -9,6 +9,6 @@ class Tracking:
         self.model = YOLO(model_path)
 
     def get_detection(self, frame: np.ndarray) -> List:
-        results = self.model(frame)
+        results = self.model(frame, verbose=False)
         results_json = json.loads(results[0].to_json())
         return results_json
