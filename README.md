@@ -78,8 +78,8 @@ docker compose -f docker-compose-prod.yml up -d
 ### Test pico script
 
 ```bash
-cp ./RPI_PICO-20241129-v1.24.1.uf2 /media/user/RPI-RP2/
-ampy --port /dev/ttyACM0 put src/pico_script/servo.py
+cp ./RPI_PICO-20241129-v1.24.1.uf2 /media/$USER/RPI-RP2/
+ampy --port /dev/ttyACM0 put src/pico_script/L298N.py
 ampy --port /dev/ttyACM0 put src/pico_script/const.py
 ampy --port /dev/ttyACM0 run src/pico_script/*.py
 ```

@@ -1,11 +1,11 @@
-from servo import Servo
-from const import TOP_ARM_MOTOR_PIN
-import time
+from machine import Pin, PWM
+from L298N import L298N
+import const
 
-serv = Servo(TOP_ARM_MOTOR_PIN)
+ENA2 = PWM(Pin(const.PIN_MOTOR_1))
+IN3 = Pin(const.PIN_MOTOR_4, Pin.OUT)
+IN4 = Pin(const.PIN_MOTOR_4, Pin.OUT)
 
-serv.turn(0)
+motor2 = L298N(ENA2, IN3, IN4)
 
-time.sleep(1)
-
-serv.destroy()
+motor2.setSpeed(25000)
