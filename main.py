@@ -21,7 +21,6 @@ class Main:
         self.tracking = Tracking("yolov10s.pt")
         self.road_decision: List[int] = []
         self.detection_decision: List[int] = []
-        self.last_action = "left"
         self.active_road_detection = True
         self.active_object_detection = True
 
@@ -32,13 +31,8 @@ class Main:
             return "straight"
         return "left" if self.road_decision[-1] > 0 else "right"
 
-    def execute_action(self, action: str):
-        if self.last_action != action:
-            if self.last_action == "left":
-                PicoController.execute_change_direction_right()
-            else:
-                PicoController.execute_change_direction_left()
-            self.last_action = action
+    @staticmethod
+    def execute_action(action: str):
         if action == "left":
             PicoController.execute_left_turn()
         elif action == "right":
@@ -92,5 +86,4 @@ class Main:
 
 if __name__ == "__main__":
     PicoController.install_micropython()
-    PicoController.execute_test_connection()
     Main().pipeline()
