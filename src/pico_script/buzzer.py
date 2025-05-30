@@ -1,13 +1,13 @@
-from machine import Pin, PWM
+from machine import Pin
 import time
 
-PIN_BUZZER = 5
-TIME_TO_ACTIVE = 0.5
+PIN_NUMBER = 15
+TIMEOUT = 0.5
 
-buzzer = PWM(Pin(PIN_BUZZER), Pin.OUT)
+pin = Pin(PIN_NUMBER, Pin.OUT)
 
-buzzer.active(1)
+pin.value(1)
 
-time.sleep(TIME_TO_ACTIVE)
+time.sleep(TIMEOUT)
 
-buzzer.active(0)
+pin.value(0)
