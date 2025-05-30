@@ -21,7 +21,7 @@ class Main:
         if self.only_record:
             self.cap = cv2.VideoCapture(sys.argv[1])
         else:
-            self.cap = cv2.VideoCapture(0)
+            self.cap = cv2.VideoCapture(int(sys.argv[1]))
 
     def get_decision(self) -> int:
         if len(self.detection_decision) > 5:
@@ -43,7 +43,7 @@ class Main:
         }
 
         if not self.only_record:
-            PicoController.install_micropython(lite=False)
+            PicoController.install_micropython(lite=True)
 
         while self.cap.isOpened():
             ret, frame = self.cap.read()
@@ -83,6 +83,7 @@ class Main:
                             2,
                         )
                     else:
+                        print("Alert")
                         PicoController.active_buzzer()
 
                 video_writer.write(frame)
@@ -98,7 +99,9 @@ class Main:
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print(
-            "Usage: python test/test_road_detection.py " "<video_path> " "<only_record>"
+            "Usage: python test/test_tracking_distance.py "
+            "<video_path> "
+            "<only_record>"
         )
         sys.exit(1)
     Main().pipeline()
