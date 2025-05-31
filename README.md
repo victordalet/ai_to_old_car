@@ -61,6 +61,8 @@ python3 main.py
 ```bash
 export PYTHONPATH=$(pwd)/src:$(pwd)
 python3 test/test_road_detection.py <video_path> <active_road_detection> <active_object_detection> <active_drawing>
+python3 test/test_distance_detection.py <video_path> 
+python3 test/test_tracking_distance.py <video_path> <only_record>
 ```
 
 ### With docker
