@@ -12,10 +12,15 @@ class PicoController:
         os.system("ampy --port /dev/ttyACM0 run src/pico_script/turn_right.py")
 
     @staticmethod
-    def install_micropython():
+    def install_micropython(lite: bool = False):
         os.system("cp ./RPI_PICO-20241129-v1.24.1.uf2 /media/victor/RPI-RP2/")
         time.sleep(10)
-        os.system("ampy --port /dev/ttyACM0 put src/pico_script/servo.py")
-        time.sleep(2)
-        os.system("ampy --port /dev/ttyACM0 put src/pico_script/const.py")
-        time.sleep(2)
+        if not lite:
+            os.system("ampy --port /dev/ttyACM0 put src/pico_script/servo.py")
+            time.sleep(2)
+            os.system("ampy --port /dev/ttyACM0 put src/pico_script/const.py")
+            time.sleep(2)
+
+    @staticmethod
+    def active_buzzer():
+        os.system("ampy --port /dev/ttyACM0 run src/pico_script/buzzer.py")
