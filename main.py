@@ -1,35 +1,33 @@
-from src.road_detection.road_detector import RoadDetector
+from src.const import (
+    PERCENTAGE_MOVEMENT,
+    YOLO_MODEL,
+    MIDAS_MODEL,
+    CAMERA_SOURCE,
+    ACTION_DECISION,
+    MAX_SIZE_STACK_ROAD_DECISION,
+    MIDAS_DISTANCE_THRESHOLD,
+)
+from src.midas_distance_estimator import MidasDistanceEstimator
+from src.movement_detector import MovementDetector
 from src.object_detection.tracking import Tracking
-from src.object_detection.distance_estimation import DistanceEstimation
 from src.pico_script.pico_controller import PicoController
 import cv2
 import os
-from collections import defaultdict
-import numpy as np
 from typing import List
 
-MAX_AREA = 40000
-MAX_ARRAY_DECISION_SIZE = 20
+from src.road_decision import RoadDecision
 
-
-FILTERED_CLASSES = ["person"]
+DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
 
 
 class Main:
     def __init__(self):
-        self.cap = cv2.VideoCapture(4)
-        self.tracking = Tracking("yolov10s.pt")
-        self.road_decision: List[int] = []
-        self.detection_decision: List[int] = []
-        self.active_road_detection = True
-        self.active_object_detection = True
-
-    def get_decision(self) -> str:
-        if len(self.detection_decision) > 5:
-            return "left" if self.detection_decision[-1] > 0 else "right"
-        if len(self.road_decision) < 1:
-            return "straight"
-        return "left" if self.road_decision[-1] > 0 else "right"
+        self.cap = cv2.VideoCapture(CAMERA_SOURCE)
+        self.tracking = Tracking(YOLO_MODEL)
+        self.depth_estimator = MidasDistanceEstimator(MIDAS_MODEL)
+        self.movement_detector = MovementDetector(PERCENTAGE_MOVEMENT)
+        self.road_decision = RoadDecision()
+        self.road_decision_stack: List[str] = []
 
     @staticmethod
     def execute_action(action: str):
@@ -39,51 +37,54 @@ class Main:
             PicoController.execute_right_turn()
 
     def pipeline(self):
+        video_writer = None
+        if DEBUG:
+            video_writer = cv2.VideoWriter(
+                "output.mp4",
+                cv2.VideoWriter_fourcc(*"mp4v"),
+                30,
+                (int(self.cap.get(3)), int(self.cap.get(4))),
+            )
+
         while self.cap.isOpened():
             ret, frame = self.cap.read()
-            frame = cv2.flip(frame, -1)
 
             if ret:
-                if self.active_road_detection:
-                    lines = RoadDetector.get_lines(frame)
-                    line_image = RoadDetector.display_lines(frame, lines)
-                    deviation_position = RoadDetector.determine_ligne_deviation(lines)
-                    self.road_decision.append(deviation_position)
-                    frame = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
+                if self.movement_detector.is_in_action_frame(frame, DEBUG):
+                    self.road_decision_stack.append(
+                        self.depth_estimator.run(frame, MIDAS_DISTANCE_THRESHOLD, DEBUG)
+                    )
+                else:
+                    self.road_decision_stack.append(ACTION_DECISION[0])
+                action = self.road_decision.decide(self.road_decision_stack)
+                if len(self.road_decision_stack) > MAX_SIZE_STACK_ROAD_DECISION:
+                    self.road_decision_stack.pop(0)
+                if DEBUG:
+                    cv2.putText(
+                        frame,
+                        f"Action: {action}",
+                        (10, 70),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        1,
+                        (255, 0, 0) if action != ACTION_DECISION[2] else (0, 0, 255),
+                        2 if action != ACTION_DECISION[2] else 3,
+                    )
+                else:
+                    self.execute_action(action)
 
-                if self.active_object_detection:
-                    results_json = self.tracking.get_detection(frame)
-
-                    for res in results_json:
-                        if res["name"] not in FILTERED_CLASSES:
-                            continue
-
-                        x1 = int(res["box"]["x1"])
-                        y1 = int(res["box"]["y1"])
-                        x2 = int(res["box"]["x2"])
-                        y2 = int(res["box"]["y2"])
-                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                        area_to_object = DistanceEstimation.area_to_object(res)
-                        if area_to_object > MAX_AREA:
-                            self.detection_decision.append(
-                                90 if x1 > frame.shape[1] / 2 else -90
-                            )
-                        else:
-                            if len(self.detection_decision) > 1:
-                                self.detection_decision.pop(0)
-
-                action = self.get_decision()
-                self.execute_action(action)
-                if os.getenv("DEBUG", False):
-                    cv2.imshow("frame", frame)
+                if DEBUG and video_writer is not None:
+                    video_writer.write(frame)
 
             else:
                 break
 
+        if DEBUG and video_writer is not None:
+            video_writer.release()
         self.cap.release()
         cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    PicoController.install_micropython()
+    if not DEBUG:
+        PicoController.install_micropython()
     Main().pipeline()
