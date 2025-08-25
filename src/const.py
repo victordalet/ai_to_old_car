@@ -1,7 +1,8 @@
-CAMERA_SOURCE = "./test2.mp4"
+CAMERA_SOURCE = "./test6.mp4"
 PERCENTAGE_MOVEMENT = 30
 MAX_SIZE_STACK_ROAD_DECISION = 7
 MIDAS_DISTANCE_THRESHOLD = 130
 MIDAS_MODEL = "MiDaS_small"
 YOLO_MODEL = "yolov10s.pt"
-ACTION_DECISION = {0: "no_movement", 1: "is_ok", 2: "obstacle"}
+RED_RATION_TRAFFIC_LIGHT = 0.1
+ACTION_DECISION = {0: "no_movement", 1: "is_ok", 2: "obstacle", 3: "stop"}

@@ -18,9 +18,11 @@ class MovementDetector:
                 (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
-                (0, 255, 0)
-                if movement_percentage > self.percentage_movement
-                else (0, 0, 255),
+                (
+                    (0, 255, 0)
+                    if movement_percentage > self.percentage_movement
+                    else (0, 0, 255)
+                ),
                 2,
             )
         return movement_percentage > self.percentage_movement

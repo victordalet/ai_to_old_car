@@ -29,13 +29,6 @@ class Main:
         self.road_decision = RoadDecision()
         self.road_decision_stack: List[str] = []
 
-    @staticmethod
-    def execute_action(action: str):
-        if action == "left":
-            PicoController.execute_left_turn()
-        elif action == "right":
-            PicoController.execute_right_turn()
-
     def pipeline(self):
         video_writer = None
         if DEBUG:
@@ -54,6 +47,8 @@ class Main:
                     self.road_decision_stack.append(
                         self.depth_estimator.run(frame, MIDAS_DISTANCE_THRESHOLD, DEBUG)
                     )
+                    if self.tracking.detect_red_traffic_light(frame, DEBUG):
+                        self.road_decision_stack.append(ACTION_DECISION[3])
                 else:
                     self.road_decision_stack.append(ACTION_DECISION[0])
                 action = self.road_decision.decide(self.road_decision_stack)
@@ -70,7 +65,7 @@ class Main:
                         2 if action != ACTION_DECISION[2] else 3,
                     )
                 else:
-                    self.execute_action(action)
+                    self.road_decision.execute_action(action)
 
                 if DEBUG and video_writer is not None:
                     video_writer.write(frame)

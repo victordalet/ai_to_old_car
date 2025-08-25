@@ -1,3 +1,5 @@
 opencv-python
-ultralytics==8.3.18
+ultralytics
 adafruit-ampy
+torch
+torchvision
