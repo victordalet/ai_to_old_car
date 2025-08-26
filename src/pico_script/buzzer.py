@@ -2,7 +2,7 @@ from machine import Pin
 import time
 
 PIN_NUMBER = 15
-TIMEOUT = 0.5
+TIMEOUT = 0.1
 
 pin = Pin(PIN_NUMBER, Pin.OUT)
 

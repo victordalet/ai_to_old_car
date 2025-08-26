@@ -1,11 +1,9 @@
-from src.road_detection.road_detector import RoadDetector
+from src.road_detector import RoadDetector
 from src.object_detection.tracking import Tracking
 from src.object_detection.distance_estimation import DistanceEstimation
 from src.object_detection.object_to_drawing import ObjectToDrawing
 import cv2
 import sys
-from collections import defaultdict
-import numpy as np
 from typing import List
 
 MAX_AREA = 2500
