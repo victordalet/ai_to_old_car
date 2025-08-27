@@ -9,12 +9,14 @@ from src.const import (
 )
 from src.midas_distance_estimator import MidasDistanceEstimator
 from src.movement_detector import MovementDetector
-from src.object_detection.tracking import Tracking
+
 from src.pico_script.pico_controller import PicoController
 import cv2
 import os
 from typing import List
 
+if not os.getenv("RM_ULTRALYTICS", "False").lower() in ("true", "1"):
+    from src.object_detection.tracking import Tracking
 from src.road_decision import RoadDecision
 
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
@@ -23,7 +25,8 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
 class Main:
     def __init__(self):
         self.cap = cv2.VideoCapture(CAMERA_SOURCE)
-        self.tracking = Tracking(YOLO_MODEL)
+        if not os.getenv("RM_ULTRALYTICS", "False").lower() in ("true", "1"):
+            self.tracking = Tracking(YOLO_MODEL)
         self.depth_estimator = MidasDistanceEstimator(MIDAS_MODEL)
         self.movement_detector = MovementDetector(PERCENTAGE_MOVEMENT)
         self.road_decision = RoadDecision()
@@ -47,8 +50,12 @@ class Main:
                     self.road_decision_stack.append(
                         self.depth_estimator.run(frame, MIDAS_DISTANCE_THRESHOLD, DEBUG)
                     )
-                    if self.tracking.detect_red_traffic_light(frame, DEBUG):
-                        self.road_decision_stack.append(ACTION_DECISION[3])
+                    if not os.getenv("RM_ULTRALYTICS", "False").lower() in (
+                        "true",
+                        "1",
+                    ):
+                        if self.tracking.detect_red_traffic_light(frame, DEBUG):
+                            self.road_decision_stack.append(ACTION_DECISION[3])
                 else:
                     self.road_decision_stack.append(ACTION_DECISION[0])
                 action = self.road_decision.decide(self.road_decision_stack)
