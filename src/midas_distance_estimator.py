@@ -58,6 +58,12 @@ class MidasDistanceEstimator:
         depth_map = (depth_map * 255).astype(np.uint8)
         return depth_map
 
+    def show_debug_depth_estimation(self, frame: np.ndarray) -> np.ndarray:
+        depth_map = self.preprocess(frame)
+        depth_colored = cv2.applyColorMap(depth_map, cv2.COLORMAP_JET)
+        combined = cv2.addWeighted(frame, 0.6, depth_colored, 0.4, 0)
+        return combined
+
     def run(self, frame: np.ndarray, threshold, debug) -> str:
         depth_map = self.preprocess(frame)
         median_depth_estimation = int(np.median(depth_map))

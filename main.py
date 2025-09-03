@@ -1,3 +1,5 @@
+import numpy as np
+
 from src.const import (
     PERCENTAGE_MOVEMENT,
     YOLO_MODEL,
@@ -14,10 +16,14 @@ from src.pico_script.pico_controller import PicoController
 import cv2
 import os
 from typing import List
-
 from src.road_decision import RoadDecision
 
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
+
+SCREEN_LIVE_DEBUG = os.getenv("SCREEN_LIVE_DEBUG", "False").lower() in (
+    "true",
+    "1",
+)
 
 
 class Main:
@@ -42,7 +48,21 @@ class Main:
         while self.cap.isOpened():
             ret, frame = self.cap.read()
 
+            yolo_frame: np.ndarray = frame.copy()
+            midas_frame: np.ndarray = frame.copy()
+            movement_frame: np.ndarray = frame.copy()
+
             if ret:
+
+                if DEBUG and SCREEN_LIVE_DEBUG:
+                    movement_frame = self.movement_detector.show_debug_movement(
+                        movement_frame
+                    )
+                    midas_frame = self.depth_estimator.show_debug_depth_estimation(
+                        midas_frame
+                    )
+                    yolo_frame = self.tracking.show_debug_yolo_detection(yolo_frame)
+
                 if self.movement_detector.is_in_action_frame(frame, DEBUG):
                     self.road_decision_stack.append(
                         self.depth_estimator.run(frame, MIDAS_DISTANCE_THRESHOLD, DEBUG)
@@ -69,6 +89,14 @@ class Main:
 
                 if DEBUG and video_writer is not None:
                     video_writer.write(frame)
+
+                if SCREEN_LIVE_DEBUG:
+                    cv2.imshow("Frame 1", frame)
+                    cv2.imshow("YOLO Detection", yolo_frame)
+                    cv2.imshow("MiDaS Depth Estimation", midas_frame)
+                    cv2.imshow("Movement Detection", movement_frame)
+                    if cv2.waitKey(1) & 0xFF == ord("q"):
+                        break
 
             else:
                 break
