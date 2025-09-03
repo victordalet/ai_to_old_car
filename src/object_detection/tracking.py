@@ -23,6 +23,27 @@ class Tracking:
                     return True
         return False
 
+    def show_debug_yolo_detection(self, frame: np.ndarray) -> np.ndarray:
+        detections = self.get_detection(frame)
+        for obj in detections:
+            x1, y1, x2, y2 = (
+                int(obj["box"]["x1"]),
+                int(obj["box"]["y1"]),
+                int(obj["box"]["x2"]),
+                int(obj["box"]["y2"]),
+            )
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+            cv2.putText(
+                frame,
+                f"{obj['name']} {obj['confidence']:.2f}",
+                (x1, y1 - 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (255, 0, 0),
+                2,
+            )
+        return frame
+
     def detect_red_traffic_light(self, frame: np.ndarray, debug: bool) -> bool:
         detections = self.get_detection(frame)
         for obj in detections:

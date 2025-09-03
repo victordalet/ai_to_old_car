@@ -48,6 +48,12 @@ ACCELERATOR_MOTOR_PIN = 19
 ### Main
 
 ---
+ - Optional: 
+```bash
+export DEBUG=1
+export SCREEN_LIVE_DEBUG=1
+export USE_CPU=1
+```
 
 ```bash
 export PYTHONPATH=$(pwd)/src:$(pwd)
